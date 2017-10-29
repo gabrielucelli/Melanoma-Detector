@@ -46,7 +46,7 @@ class PreviewActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
         setSupportActionBar(toolbar)
-        supportActionBar?.title = "";
+        supportActionBar?.title = "Recorte a imagem"
         supportActionBar?.setDisplayHomeAsUpEnabled(true);
         supportActionBar?.setDisplayShowHomeEnabled(true);
         toolbar.setNavigationOnClickListener { onBackPressed() }

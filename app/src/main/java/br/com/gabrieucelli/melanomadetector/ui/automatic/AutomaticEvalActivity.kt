@@ -27,10 +27,10 @@ class AutomaticEvalActivity : AppCompatActivity() {
     private val IMAGE_STD = 1f
 
     private val INPUT_NAME = "input"
-    private val OUTPUT_NAME = "output"
+    private val OUTPUT_NAME = "final_result"
 
-    private val MODEL_FILE = "file:///android_asset/tensorflow_inception_graph.pb"
-    private val LABEL_FILE = "file:///android_asset/imagenet_comp_graph_label_strings.txt"
+    private val MODEL_FILE = "file:///android_asset/optimized_graph.pb"
+    private val LABEL_FILE = "file:///android_asset/retrained_labels.txt"
 
     private val handlerThread: HandlerThread by lazy { HandlerThread("inference").apply { start() } }
     private val handler: Handler by lazy { Handler(handlerThread.looper) }
@@ -67,7 +67,7 @@ class AutomaticEvalActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
         setSupportActionBar(toolbar)
-        supportActionBar?.title = "Automatic Evaluation"
+        supportActionBar?.title = "Avaliação Automática"
         supportActionBar?.setDisplayHomeAsUpEnabled(true);
         supportActionBar?.setDisplayShowHomeEnabled(true);
         toolbar.setNavigationOnClickListener { onBackPressed() }
