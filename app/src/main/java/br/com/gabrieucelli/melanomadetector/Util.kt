@@ -1,5 +1,6 @@
 package br.com.gabrieucelli.melanomadetector
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -8,6 +9,8 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
+import android.view.WindowManager
+import android.widget.Toast
 
 /**
  * Created by Gabriel on 26/10/2017.
@@ -84,4 +87,14 @@ fun scaleToSizeWindow(context: Context, bitmap: Bitmap): Bitmap {
             (bitmap.width / scale).toInt(),
             (bitmap.height / scale).toInt(),
             true)
+}
+
+fun Activity.setStatusBarTranslucent() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+    }
+}
+
+fun Context.showToast(msg: String) {
+    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 }

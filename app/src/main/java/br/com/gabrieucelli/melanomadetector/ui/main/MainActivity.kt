@@ -1,24 +1,32 @@
 package br.com.gabrieucelli.melanomadetector.ui.main
 
 import android.app.Activity
-import android.graphics.BitmapFactory
-import android.os.Build
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.view.MotionEvent
 import android.view.View
-import android.view.WindowManager
+import br.com.gabrieucelli.melanomadetector.ImagePicker
 import br.com.gabrieucelli.melanomadetector.R
+import br.com.gabrieucelli.melanomadetector.setStatusBarTranslucent
+import br.com.gabrieucelli.melanomadetector.showToast
 import br.com.gabrieucelli.melanomadetector.ui.ResultHolder
 import br.com.gabrieucelli.melanomadetector.ui.preview.PreviewActivity
 import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.OnTouch
-import com.wonderkiln.camerakit.CameraListener
+import com.wonderkiln.camerakit.CameraKitImage
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.FileNotFoundException
 
 
 class MainActivity : AppCompatActivity() {
+
+    private val RESULT_LOAD_IMG: Int = 123
+    private var openPreview = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,20 +35,24 @@ class MainActivity : AppCompatActivity() {
         setStatusBarTranslucent()
     }
 
+    fun imageCaptured(image: CameraKitImage) {
+        image.bitmap?.let { setImageHolder(it) }
+        PreviewActivity.start(this@MainActivity)
+    }
+
     override fun onResume() {
         super.onResume()
-        cameraView.start()
-    }
-
-    override fun onPause() {
-        cameraView.stop()
-        super.onPause()
-    }
-
-    private fun Activity.setStatusBarTranslucent() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        if (openPreview) {
+            PreviewActivity.start(this@MainActivity)
+            openPreview = false
+        } else {
+            cameraView.start()
         }
+    }
+
+    override fun onStop() {
+        cameraView.stop()
+        super.onStop()
     }
 
     @OnTouch(R.id.focusMarker)
@@ -49,19 +61,46 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
+    @OnClick(R.id.open_galeria)
+    fun openGaleria() {
+        val chooseImageIntent = ImagePicker.getPickImageIntent(this)
+        startActivityForResult(chooseImageIntent, RESULT_LOAD_IMG)
+    }
+
+    override fun onActivityResult(reqCode: Int, resultCode: Int, data: Intent?) {
+
+        super.onActivityResult(reqCode, resultCode, data)
+
+        if (resultCode == Activity.RESULT_OK
+                && reqCode == RESULT_LOAD_IMG
+                && data != null) {
+
+            try {
+                val bitmap = ImagePicker.getImageFromResult(this, resultCode, data)
+                openPreview = true
+                Handler().post({ setImageHolder(bitmap) })
+
+            } catch (e: FileNotFoundException) {
+                e.printStackTrace()
+                showToast("Aconteceu alguma coisa errada :(")
+            }
+        }
+    }
+
+    private fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(degrees)
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+    }
+
+
     @OnClick(R.id.button_ok)
     fun capturePhoto() {
+        cameraView.captureImage { event -> imageCaptured(event) }
+    }
 
-        cameraView.setCameraListener(object : CameraListener() {
-            override fun onPictureTaken(jpeg: ByteArray) {
-                super.onPictureTaken(jpeg)
-                val bitmap = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size)
-                ResultHolder.dispose()
-                ResultHolder.setImage(bitmap)
-                PreviewActivity.start(this@MainActivity)
-            }
-        })
-
-        cameraView.captureImage()
+    private fun setImageHolder(bitmap: Bitmap) {
+        ResultHolder.dispose()
+        ResultHolder.setImage(bitmap)
     }
 }
