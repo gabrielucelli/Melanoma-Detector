@@ -3,7 +3,6 @@ package br.com.gabrieucelli.melanomadetector.ui.main
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.os.Bundle
 import android.os.Handler
 import android.support.v7.app.AppCompatActivity
@@ -36,8 +35,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun imageCaptured(image: CameraKitImage) {
-        image.bitmap?.let { setImageHolder(it) }
-        PreviewActivity.start(this@MainActivity)
+        Handler().post({
+            image.bitmap?.let { setImageHolder(it) }
+            runOnUiThread {
+                PreviewActivity.start(this@MainActivity)
+            }
+        })
     }
 
     override fun onResume() {
@@ -86,13 +89,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-    private fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
-        val matrix = Matrix()
-        matrix.postRotate(degrees)
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-    }
-
 
     @OnClick(R.id.button_ok)
     fun capturePhoto() {

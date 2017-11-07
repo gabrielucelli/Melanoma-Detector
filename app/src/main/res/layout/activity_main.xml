@@ -25,7 +25,7 @@
             app:ckFacing="back"
             app:ckFlash="off"
             app:ckFocus="tap"
-            app:ckJpegQuality="98"
+            app:ckJpegQuality="95"
             app:ckMethod="still" />
 
         <br.com.gabrieucelli.melanomadetector.view.FocusMarkerLayout
