@@ -6,10 +6,7 @@ package br.com.gabrieucelli.melanomadetector.classifier;
 
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.os.Build;
-import android.os.Trace;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import org.tensorflow.Operation;
@@ -122,13 +119,9 @@ public class TensorFlowImageClassifier implements Classifier {
     }
 
     @NonNull
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public List<Recognition> recognizeImage(@NonNull final Bitmap bitmap) {
-        // Log this method so that it can be analyzed with systrace.
-        Trace.beginSection("recognizeImage");
 
-        Trace.beginSection("preprocessBitmap");
         // Preprocess the image data from 0-255 int to normalized float based
         // on the provided parameters.
         bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
@@ -140,22 +133,11 @@ public class TensorFlowImageClassifier implements Classifier {
             floatValues[i * 3 + 2] = ((val & 0xFF) - imageMean) / imageStd;
         }
 
-        Trace.endSection();
-
-        // Copy the input data into TensorFlow.
-        Trace.beginSection("feed");
         inferenceInterface.feed(inputName, floatValues, 1, inputSize, inputSize, 3);
-        Trace.endSection();
 
-        // Run the inference call.
-        Trace.beginSection("run");
         inferenceInterface.run(outputNames, logStats);
-        Trace.endSection();
 
-        // Copy the output Tensor back into the output array.
-        Trace.beginSection("fetch");
         inferenceInterface.fetch(outputName, outputs);
-        Trace.endSection();
 
         // Find the best classifications.
         PriorityQueue<Recognition> pq =
@@ -175,14 +157,13 @@ public class TensorFlowImageClassifier implements Classifier {
                                 "" + i, labels.size() > i ? labels.get(i) : "unknown", outputs[i], null));
             }
         }
+
         final ArrayList<Recognition> recognitions = new ArrayList<Recognition>();
         int recognitionsSize = Math.min(pq.size(), MAX_RESULTS);
 
         for (int i = 0; i < recognitionsSize; ++i) {
             recognitions.add(pq.poll());
         }
-
-        Trace.endSection(); // "recognizeImage"
 
         return recognitions;
     }

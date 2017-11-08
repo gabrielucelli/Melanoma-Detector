@@ -85,9 +85,8 @@ class AutomaticEvalActivity : AppCompatActivity() {
 
     public override fun onPause() {
 
-        handlerThread.quitSafely()
-
         try {
+            handlerThread.interrupt()
             handlerThread.join()
         } catch (e: InterruptedException) {
             e.printStackTrace()

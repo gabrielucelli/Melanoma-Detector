@@ -3,6 +3,7 @@ package br.com.gabrieucelli.melanomadetector.ui.main
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
 import android.support.v7.app.AppCompatActivity
@@ -17,7 +18,7 @@ import br.com.gabrieucelli.melanomadetector.ui.preview.PreviewActivity
 import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.OnTouch
-import com.wonderkiln.camerakit.CameraKitImage
+import com.wonderkiln.camerakit.CameraListener
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.FileNotFoundException
 
@@ -32,15 +33,21 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         ButterKnife.bind(this)
         setStatusBarTranslucent()
-    }
 
-    fun imageCaptured(image: CameraKitImage) {
-        Handler().post({
-            image.bitmap?.let { setImageHolder(it) }
-            runOnUiThread {
-                PreviewActivity.start(this@MainActivity)
+        cameraView.setCameraListener(object : CameraListener() {
+            override fun onPictureTaken(picture: ByteArray?) {
+                super.onPictureTaken(picture)
+                val result = BitmapFactory.decodeByteArray(picture, 0, picture!!.size)
+                imageCaptured(result)
             }
         })
+    }
+
+    fun imageCaptured(image: Bitmap) {
+        image.let { setImageHolder(it) }
+        runOnUiThread {
+            PreviewActivity.start(this@MainActivity)
+        }
     }
 
     override fun onResume() {
@@ -92,7 +99,7 @@ class MainActivity : AppCompatActivity() {
 
     @OnClick(R.id.button_ok)
     fun capturePhoto() {
-        cameraView.captureImage { event -> imageCaptured(event) }
+        cameraView.captureImage()
     }
 
     private fun setImageHolder(bitmap: Bitmap) {

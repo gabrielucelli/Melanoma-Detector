@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Melanoma-Detector.iml" filepath="$PROJECT_DIR$/Melanoma-Detector.iml" />
       <module fileurl="file://$PROJECT_DIR$/MelanomaDetector.iml" filepath="$PROJECT_DIR$/MelanomaDetector.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
